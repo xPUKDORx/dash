@@ -14,9 +14,39 @@ Features:
 - Suggested follow-up questions
 """
 
-from typing import Any, Optional
+from typing import Any
 
 from agno.tools import tool
+
+
+def _extract_numeric_values(results: list[dict[str, Any]], column: str) -> list[int | float]:
+    """Extract numeric values from a column across all result rows.
+
+    Args:
+        results: List of result dictionaries.
+        column: Column name to extract values from.
+
+    Returns:
+        List of numeric values (int or float), excluding None and non-numeric values.
+    """
+    values: list[int | float] = []
+    for row in results:
+        val = row.get(column)
+        if isinstance(val, (int, float)):
+            values.append(val)
+    return values
+
+
+def _get_numeric_columns(row: dict[str, Any]) -> list[str]:
+    """Get list of column names that contain numeric values.
+
+    Args:
+        row: A single result row dictionary.
+
+    Returns:
+        List of column names with numeric values.
+    """
+    return [key for key, value in row.items() if isinstance(value, (int, float))]
 
 
 @tool
@@ -24,7 +54,7 @@ def analyze_results(
     results: list[dict[str, Any]],
     question: str,
     sql_query: str,
-    context: Optional[str] = None,
+    context: str | None = None,
 ) -> str:
     """Analyze query results and provide insights.
 
@@ -51,7 +81,7 @@ def analyze_results(
     if not results:
         return _format_empty_results(question, sql_query)
 
-    analysis_parts = []
+    analysis_parts: list[str] = []
 
     # Header
     analysis_parts.append("## Analysis")
@@ -122,7 +152,7 @@ Would you like me to investigate why no results were returned?"""
 
 def _extract_key_findings(results: list[dict[str, Any]], question: str) -> list[str]:
     """Extract key findings from results based on the question."""
-    findings = []
+    findings: list[str] = []
 
     if not results:
         return ["No data found matching the criteria"]
@@ -149,9 +179,9 @@ def _extract_key_findings(results: list[dict[str, Any]], question: str) -> list[
 
     # If comparing (multiple results), note the range
     if len(results) >= 2:
-        numeric_cols = [k for k, v in results[0].items() if isinstance(v, (int, float)) and v is not None]
+        numeric_cols = _get_numeric_columns(results[0])
         for col in numeric_cols[:1]:  # Just the first numeric column
-            values = [r.get(col) for r in results if r.get(col) is not None]
+            values = _extract_numeric_values(results, col)
             if values:
                 min_val = min(values)
                 max_val = max(values)
@@ -166,20 +196,15 @@ def _compute_statistics(results: list[dict[str, Any]]) -> dict[str, dict[str, An
     if not results:
         return {}
 
-    stats = {}
-    numeric_cols = []
-
-    # Find numeric columns
-    for key, value in results[0].items():
-        if isinstance(value, (int, float)) and value is not None:
-            numeric_cols.append(key)
+    stats: dict[str, dict[str, Any]] = {}
+    numeric_cols = _get_numeric_columns(results[0])
 
     for col in numeric_cols:
-        values = [r.get(col) for r in results if r.get(col) is not None and isinstance(r.get(col), (int, float))]
+        values = _extract_numeric_values(results, col)
         if not values:
             continue
 
-        col_stats = {
+        col_stats: dict[str, Any] = {
             "min": min(values),
             "max": max(values),
             "count": len(values),
@@ -215,7 +240,7 @@ def _format_results_table(results: list[dict[str, Any]], max_rows: int = 10) -> 
     separator = "| " + " | ".join(["---"] * len(columns)) + " |"
 
     # Build rows
-    rows = []
+    rows: list[str] = []
     for result in display_results:
         values = [str(result.get(col, "")) for col in columns]
         rows.append("| " + " | ".join(values) + " |")
@@ -230,7 +255,7 @@ def _format_results_table(results: list[dict[str, Any]], max_rows: int = 10) -> 
 
 def _suggest_follow_ups(results: list[dict[str, Any]], question: str) -> list[str]:
     """Suggest relevant follow-up questions based on results."""
-    suggestions = []
+    suggestions: list[str] = []
     question_lower = question.lower()
 
     # Time-based follow-ups

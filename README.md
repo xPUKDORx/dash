@@ -1,4 +1,4 @@
-# Data Agent
+# Self-Learning Data Agent
 
 A self-learning data agent that provides **insights**, not just query results.
 

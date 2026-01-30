@@ -18,9 +18,7 @@ from typing import Any
 
 from agno.utils.log import logger
 
-# Knowledge is at repo root level (../../knowledge from da/context/)
-KNOWLEDGE_DIR = Path(__file__).parent.parent.parent / "knowledge"
-TABLES_DIR = KNOWLEDGE_DIR / "tables"
+from da.paths import TABLES_DIR
 
 
 def load_table_metadata(tables_dir: Path | None = None) -> list[dict[str, Any]]:
@@ -36,7 +34,7 @@ def load_table_metadata(tables_dir: Path | None = None) -> list[dict[str, Any]]:
     if tables_dir is None:
         tables_dir = TABLES_DIR
 
-    tables = []
+    tables: list[dict[str, Any]] = []
     if not tables_dir.exists():
         logger.warning(f"Tables directory not found: {tables_dir}")
         return tables
@@ -56,8 +54,12 @@ def load_table_metadata(tables_dir: Path | None = None) -> list[dict[str, Any]]:
                     "related_tables": table.get("related_tables", []),
                 }
             )
-        except Exception as e:
-            logger.error(f"Failed to load table metadata from {filepath}: {e}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in {filepath}: {e}")
+        except KeyError as e:
+            logger.error(f"Missing required field {e} in {filepath}")
+        except OSError as e:
+            logger.error(f"Failed to read {filepath}: {e}")
 
     return tables
 
@@ -88,7 +90,7 @@ def format_semantic_model(model: dict[str, Any]) -> str:
     Returns:
         Formatted string for system prompt.
     """
-    lines = []
+    lines: list[str] = []
 
     for table in model.get("tables", []):
         table_name = table["table_name"]

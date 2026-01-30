@@ -41,10 +41,8 @@ from da.context.business_rules import BUSINESS_CONTEXT
 from da.context.semantic_model import SEMANTIC_MODEL_STR
 from da.tools import (
     analyze_results,
-    introspect_schema,
-    save_validated_query,
-    set_engine,
-    set_knowledge,
+    create_introspect_schema_tool,
+    create_save_validated_query_tool,
 )
 from db import db_url, get_postgres_db
 
@@ -66,9 +64,9 @@ data_agent_knowledge = Knowledge(
     max_results=10,
 )
 
-# Initialize tool references
-set_knowledge(data_agent_knowledge)
-set_engine(db_url)
+# Create tools with dependencies injected
+save_validated_query = create_save_validated_query_tool(data_agent_knowledge)
+introspect_schema = create_introspect_schema_tool(db_url)
 
 # ============================================================================
 # System Message

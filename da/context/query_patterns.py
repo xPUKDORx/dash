@@ -21,9 +21,7 @@ from pathlib import Path
 
 from agno.utils.log import logger
 
-# Knowledge is at repo root level (../../knowledge from da/context/)
-KNOWLEDGE_DIR = Path(__file__).parent.parent.parent / "knowledge"
-QUERIES_DIR = KNOWLEDGE_DIR / "queries"
+from da.paths import QUERIES_DIR
 
 
 @dataclass
@@ -67,7 +65,7 @@ def load_query_patterns(queries_dir: Path | None = None) -> list[QueryPattern]:
     if queries_dir is None:
         queries_dir = QUERIES_DIR
 
-    patterns = []
+    patterns: list[QueryPattern] = []
 
     if not queries_dir.exists():
         logger.warning(f"Queries directory not found: {queries_dir}")
@@ -82,8 +80,8 @@ def load_query_patterns(queries_dir: Path | None = None) -> list[QueryPattern]:
             file_patterns = _parse_sql_file(content)
             patterns.extend(file_patterns)
 
-        except Exception as e:
-            logger.error(f"Failed to load query patterns from {filepath}: {e}")
+        except OSError as e:
+            logger.error(f"Failed to read {filepath}: {e}")
 
     return patterns
 
@@ -93,7 +91,7 @@ def _parse_sql_file(content: str) -> list[QueryPattern]:
 
     Uses XML-style tags in comments to extract metadata.
     """
-    patterns = []
+    patterns: list[QueryPattern] = []
 
     # Pattern to match query blocks
     # Matches: -- <query name>NAME</query name> ... -- <query>SQL</query>
@@ -143,7 +141,7 @@ def _extract_tables(query: str) -> list[str]:
 
     Simple heuristic: looks for FROM and JOIN keywords.
     """
-    tables = []
+    tables: list[str] = []
 
     # Normalize whitespace
     query = " ".join(query.split())
@@ -174,7 +172,7 @@ def format_query_patterns(patterns: list[QueryPattern]) -> str:
     Returns:
         Formatted string with all patterns.
     """
-    lines = ["## VALIDATED QUERY PATTERNS", ""]
+    lines: list[str] = ["## VALIDATED QUERY PATTERNS", ""]
 
     for pattern in patterns:
         lines.append(f"### {pattern.name}")

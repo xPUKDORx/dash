@@ -10,16 +10,14 @@ Usage:
 
 import sys
 from io import StringIO
+from os import getenv
 
+import httpx
 import pandas as pd
-import requests
-import urllib3
 from sqlalchemy import create_engine
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-# Data source
-S3_URI = "https://agno-public.s3.amazonaws.com/f1"
+# Data source - configurable via environment variable
+S3_URI = getenv("F1_DATA_URI", "https://agno-public.s3.amazonaws.com/f1")
 
 FILES_TO_TABLES = {
     f"{S3_URI}/constructors_championship_1958_2020.csv": "constructors_championship",
@@ -31,14 +29,14 @@ FILES_TO_TABLES = {
 
 
 def get_db_url() -> str:
-    """Get database URL from configuration."""
-    try:
-        from db import db_url
+    """Get database URL from configuration.
 
-        return db_url
-    except ImportError:
-        # Fallback for standalone execution
-        return "postgresql+psycopg://ai:ai@localhost:5432/ai"
+    Raises:
+        ImportError: If db module is not available.
+    """
+    from db import db_url
+
+    return db_url
 
 
 def load_f1_data(verbose: bool = True) -> bool:
@@ -61,7 +59,7 @@ def load_f1_data(verbose: bool = True) -> bool:
             if verbose:
                 print(f"Downloading {table_name}...", end=" ", flush=True)
 
-            response = requests.get(file_path, verify=False, timeout=30)
+            response = httpx.get(file_path, verify=False, timeout=30.0)
             response.raise_for_status()
 
             df = pd.read_csv(StringIO(response.text))
@@ -76,9 +74,17 @@ def load_f1_data(verbose: bool = True) -> bool:
             if verbose:
                 print("Done")
 
-        except Exception as e:
+        except httpx.HTTPStatusError as e:
             if verbose:
-                print(f"FAILED: {e}")
+                print(f"FAILED: HTTP {e.response.status_code}")
+            success = False
+        except httpx.RequestError as e:
+            if verbose:
+                print(f"FAILED: Network error - {e}")
+            success = False
+        except pd.errors.ParserError as e:
+            if verbose:
+                print(f"FAILED: CSV parse error - {e}")
             success = False
 
     if verbose:
@@ -93,7 +99,12 @@ def load_f1_data(verbose: bool = True) -> bool:
 
 def main() -> int:
     """Main entry point."""
-    db_url = get_db_url()
+    try:
+        db_url = get_db_url()
+    except ImportError:
+        print("ERROR: Database configuration not available.")
+        print("Make sure you're running from the project root with the db module accessible.")
+        return 1
 
     print("Loading F1 data into PostgreSQL")
     print(f"Database: {db_url.split('@')[1] if '@' in db_url else db_url}")

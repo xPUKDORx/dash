@@ -23,7 +23,7 @@ dependencies = [
   "mcp",
   # Data loading
   "pandas",
-  "requests",
+  "httpx",
   # Tracing
   "opentelemetry-api",
   "opentelemetry-sdk",
@@ -55,7 +55,7 @@ plugins = ["pydantic.mypy"]
 exclude = [".venv*"]
 
 [[tool.mypy.overrides]]
-module = ["pgvector.*", "setuptools.*", "agno.*"]
+module = ["pgvector.*", "setuptools.*", "agno.*", "pandas.*", "httpx.*"]
 ignore_missing_imports = true
 
 [tool.uv.pip]

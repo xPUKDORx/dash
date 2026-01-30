@@ -20,6 +20,7 @@ The test cases are designed to verify:
 """
 
 from dataclasses import dataclass, field
+from typing import Any
 
 
 @dataclass
@@ -276,16 +277,19 @@ def get_test_stats() -> dict:
     Returns:
         Dictionary with counts by category and difficulty
     """
-    stats = {
-        "total": len(TEST_CASES),
-        "by_category": {},
-        "by_difficulty": {},
-    }
+    by_category: dict[str, int] = {}
+    by_difficulty: dict[str, int] = {}
 
     for cat in CATEGORIES:
-        stats["by_category"][cat] = len([tc for tc in TEST_CASES if tc.category == cat])
+        by_category[cat] = len([tc for tc in TEST_CASES if tc.category == cat])
 
     for diff in DIFFICULTIES:
-        stats["by_difficulty"][diff] = len([tc for tc in TEST_CASES if tc.difficulty == diff])
+        by_difficulty[diff] = len([tc for tc in TEST_CASES if tc.difficulty == diff])
+
+    stats: dict[str, Any] = {
+        "total": len(TEST_CASES),
+        "by_category": by_category,
+        "by_difficulty": by_difficulty,
+    }
 
     return stats

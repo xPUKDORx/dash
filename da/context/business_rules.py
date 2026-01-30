@@ -19,12 +19,10 @@ from typing import Any
 
 from agno.utils.log import logger
 
-# Knowledge is at repo root level (../../knowledge from da/context/)
-KNOWLEDGE_DIR = Path(__file__).parent.parent.parent / "knowledge"
-BUSINESS_DIR = KNOWLEDGE_DIR / "business"
+from da.paths import BUSINESS_DIR
 
 
-def load_business_rules(business_dir: Path | None = None) -> dict[str, Any]:
+def load_business_rules(business_dir: Path | None = None) -> dict[str, list[Any]]:
     """Load business definitions from JSON files.
 
     Args:
@@ -37,7 +35,7 @@ def load_business_rules(business_dir: Path | None = None) -> dict[str, Any]:
     if business_dir is None:
         business_dir = BUSINESS_DIR
 
-    business = {
+    business: dict[str, list[Any]] = {
         "metrics": [],
         "business_rules": [],
         "common_gotchas": [],
@@ -59,8 +57,10 @@ def load_business_rules(business_dir: Path | None = None) -> dict[str, Any]:
             if "common_gotchas" in data:
                 business["common_gotchas"].extend(data["common_gotchas"])
 
-        except Exception as e:
-            logger.error(f"Failed to load business rules from {filepath}: {e}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in {filepath}: {e}")
+        except OSError as e:
+            logger.error(f"Failed to read {filepath}: {e}")
 
     return business
 
@@ -75,7 +75,7 @@ def build_business_context(business_dir: Path | None = None) -> str:
         Formatted string with metrics, rules, and gotchas.
     """
     business = load_business_rules(business_dir)
-    lines = []
+    lines: list[str] = []
 
     # Metrics
     metrics = business.get("metrics", [])

@@ -10,10 +10,8 @@ Usage:
 """
 
 import sys
-from pathlib import Path
 
-# Knowledge directory (top-level of repo)
-KNOWLEDGE_DIR = Path(__file__).parent.parent.parent / "knowledge"
+from da.paths import KNOWLEDGE_DIR
 
 
 def load_knowledge(verbose: bool = True) -> bool:
@@ -28,47 +26,46 @@ def load_knowledge(verbose: bool = True) -> bool:
     # Import here to avoid circular imports
     from da.agent import data_agent_knowledge
 
-    try:
-        if verbose:
-            print(f"Loading knowledge from: {KNOWLEDGE_DIR}")
-            print()
+    if verbose:
+        print(f"Loading knowledge from: {KNOWLEDGE_DIR}")
+        print()
 
-        # Load each subdirectory
-        subdirs = ["tables", "queries", "business"]
-        total_files = 0
+    # Load each subdirectory
+    subdirs = ["tables", "queries", "business"]
+    total_files = 0
 
-        for subdir in subdirs:
-            subdir_path = KNOWLEDGE_DIR / subdir
-            if not subdir_path.exists():
-                if verbose:
-                    print(f"  {subdir}/: (not found)")
-                continue
-
-            files = list(subdir_path.glob("*"))
-            files = [f for f in files if f.is_file() and not f.name.startswith(".")]
-
+    for subdir in subdirs:
+        subdir_path = KNOWLEDGE_DIR / subdir
+        if not subdir_path.exists():
             if verbose:
-                print(f"  {subdir}/: {len(files)} files")
-                for f in files:
-                    print(f"    - {f.name}")
+                print(f"  {subdir}/: (not found)")
+            continue
 
-            if files:
+        # Get non-hidden files only
+        files = [f for f in subdir_path.iterdir() if f.is_file() and not f.name.startswith(".")]
+
+        if verbose:
+            print(f"  {subdir}/: {len(files)} files")
+            for f in files:
+                print(f"    - {f.name}")
+
+        if files:
+            try:
                 data_agent_knowledge.insert(
                     name=f"Data Agent Knowledge - {subdir}",
                     path=str(subdir_path),
                 )
                 total_files += len(files)
+            except OSError as e:
+                if verbose:
+                    print(f"    ERROR: Failed to load {subdir}: {e}")
+                return False
 
-        if verbose:
-            print()
-            print(f"Knowledge loaded successfully! ({total_files} files)")
+    if verbose:
+        print()
+        print(f"Knowledge loaded successfully! ({total_files} files)")
 
-        return True
-
-    except Exception as e:
-        if verbose:
-            print(f"Failed to load knowledge: {e}")
-        return False
+    return True
 
 
 def main() -> int:
