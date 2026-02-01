@@ -24,7 +24,8 @@ dash/
 │   ├── load_data.py      # Load F1 sample data
 │   └── load_knowledge.py # Load knowledge files
 └── evals/
-    ├── test_cases.py     # Test cases
+    ├── test_cases.py     # Test cases with golden SQL
+    ├── grader.py         # LLM-based response grader
     └── run_evals.py      # Run evaluations
 
 app/
@@ -50,9 +51,12 @@ python -m dash.scripts.load_data       # Load F1 sample data
 python -m dash.scripts.load_knowledge  # Load knowledge into vector DB
 
 # Evaluations
-python -m dash.evals.run_evals              # Run all evals
+python -m dash.evals.run_evals              # Run all evals (string matching)
 python -m dash.evals.run_evals -c basic     # Run specific category
-python -m dash.evals.run_evals -v           # Verbose mode
+python -m dash.evals.run_evals -v           # Verbose mode (show responses)
+python -m dash.evals.run_evals -g           # Use LLM grader
+python -m dash.evals.run_evals -r           # Compare against golden SQL results
+python -m dash.evals.run_evals -g -r -v     # All modes combined
 ```
 
 ## Architecture
@@ -106,6 +110,18 @@ dash = Agent(
 | `position` is TEXT in `drivers_championship` | Use `position = '1'` |
 | `position` is INTEGER in `constructors_championship` | Use `position = 1` |
 | `date` is TEXT in `race_wins` | Use `TO_DATE(date, 'DD Mon YYYY')` |
+
+## Evaluation System
+
+Three evaluation modes (can be combined):
+
+| Mode | Flag | Description |
+|------|------|-------------|
+| String matching | (default) | Check if expected strings appear in response |
+| LLM grader | `-g` | Use GPT to evaluate response quality |
+| Result comparison | `-r` | Execute golden SQL and compare results |
+
+Test cases use `TestCase` dataclass with optional `golden_sql` for validation.
 
 ## Environment Variables
 
